@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <title>Kalkulačka</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #0a0a0a, #1a1a2e);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 20% 40%, rgba(0, 188, 212, 0.2) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 60%, rgba(156, 39, 176, 0.2) 0%, transparent 50%),
+                  radial-gradient(circle at 50% 50%, rgba(33, 150, 243, 0.15) 0%, transparent 50%);
+      animation: rotate 25s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .calculator {
+      background: rgba(20, 20, 30, 0.7);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.9),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                  0 0 80px rgba(0, 188, 212, 0.1);
+      backdrop-filter: blur(30px);
+      border-radius: 28px;
+      padding: 20px;
+      width: 100%;
+      max-width: 380px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 420px) {
+      .calculator {
+        max-width: 100%;
+        padding: 16px;
+        border-radius: 20px;
+      }
+    }
+
+    .display-container {
+      margin-bottom: 20px;
+      background: linear-gradient(145deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3));
+      border-radius: 18px;
+      box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.6),
+                  0 1px 0 rgba(255, 255, 255, 0.05);
+      padding: 16px 20px;
+    }
+
+    @media (max-width: 420px) {
+      .display-container {
+        margin-bottom: 16px;
+        padding: 12px 16px;
+        border-radius: 14px;
+      }
+    }
+
+    .expression {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.6);
+      text-align: right;
+      min-height: 24px;
+      margin-bottom: 8px;
+      word-wrap: break-word;
+      word-break: break-all;
+    }
+
+    .display {
+      font-size: 48px;
+      font-weight: 600;
+      color: #ffffff;
+      text-align: right;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      overflow: hidden;
+      word-wrap: break-word;
+      transition: all 0.2s ease;
+      word-break: break-all;
+    }
+
+    .display.small {
+      font-size: 36px;
+    }
+
+    .display.smaller {
+      font-size: 24px;
+    }
+
+    .display.error {
+      color: #ff5252;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 420px) {
+      .buttons {
+        gap: 8px;
+      }
+    }
+
+    button {
+      padding: 20px;
+      border: none;
+      border-radius: 16px;
+      font-size: 20px;
+      font-weight: 500;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+      color: #ffffff;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    button:active::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    button:hover {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .operator {
+      color: #00bcd4;
+      font-weight: bold;
+    }
+
+    .equal {
+      background: linear-gradient(145deg, #00bcd4, #0097a7);
+      color: #000;
+      font-weight: bold;
+      box-shadow: 0 4px 16px rgba(0, 188, 212, 0.4),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .equal:hover {
+      background: linear-gradient(145deg, #00acc1, #00838f);
+      box-shadow: 0 6px 20px rgba(0, 188, 212, 0.6),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+
+    .clear {
+      color: #ff5252;
+      background: linear-gradient(145deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.08));
+    }
+
+    .clear:hover {
+      background: linear-gradient(145deg, rgba(255, 82, 82, 0.25), rgba(255, 82, 82, 0.15));
+    }
+
+    @media (max-width: 420px) {
+      .display-container {
+        padding: 12px 16px;
+      }
+
+      .expression {
+        font-size: 12px;
+        min-height: 20px;
+      }
+
+      .display {
+        font-size: 32px;
+        min-height: 45px;
+      }
+
+      .display.small {
+        font-size: 26px;
+      }
+
+      .display.smaller {
+        font-size: 20px;
+      }
+
+      button {
+        padding: 14px;
+        font-size: 16px;
+        border-radius: 12px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .display {
+        font-size: 28px;
+      }
+
+      .display.small {
+        font-size: 22px;
+      }
+
+      .display.smaller {
+        font-size: 18px;
+      }
+
+      button {
+        padding: 12px;
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display-container">
+      <div class="expression" id="expression"></div>
+      <div class="display" id="display">0</div>
+    </div>
+    <div class="buttons">
+      <button class="operator" onclick="percentage()">%</button>
+      <button onclick="clearEntry()">CE</button>
+      <button class="clear" onclick="clearAll()">C</button>
+      <button class="backspace" onclick="backspace()">⌫</button>
+
+      <button onclick="inverse()">1/x</button>
+      <button class="operator" onclick="square()">x²</button>
+      <button class="operator" onclick="squareRoot()">√x</button>
+      <button class="operator" onclick="appendOperator('/')">÷</button>
+
+      <button onclick="appendNumber('7')">7</button>
+      <button onclick="appendNumber('8')">8</button>
+      <button onclick="appendNumber('9')">9</button>
+      <button class="operator" onclick="appendOperator('*')">×</button>
+
+      <button onclick="appendNumber('4')">4</button>
+      <button onclick="appendNumber('5')">5</button>
+      <button onclick="appendNumber('6')">6</button>
+      <button class="operator" onclick="appendOperator('-')">−</button>
+
+      <button onclick="appendNumber('1')">1</button>
+      <button onclick="appendNumber('2')">2</button>
+      <button onclick="appendNumber('3')">3</button>
+      <button class="operator" onclick="appendOperator('+')">+</button>
+
+      <button onclick="negate()">±</button>
+      <button onclick="appendNumber('0')">0</button>
+      <button onclick="appendDecimal()">.</button>
+      <button class="equal" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    const expressionDisplay = document.getElementById('expression');
+    
+    let currentValue = '0';
+    let previousValue = null;
+    let operator = null;
+    let waitingForOperand = false;
+    let expression = '';
+
+    function updateDisplay() {
+      display.innerText = currentValue;
+      expressionDisplay.innerText = expression;
+      adjustFontSize();
+    }
+
+    function appendNumber(num) {
+      if (waitingForOperand) {
+        currentValue = num;
+        waitingForOperand = false;
+      } else {
+        currentValue = currentValue === '0' ? num : currentValue + num;
+      }
+      updateDisplay();
+    }
+
+    function appendDecimal() {
+      if (waitingForOperand) {
+        currentValue = '0.';
+        waitingForOperand = false;
+      } else if (currentValue.indexOf('.') === -1) {
+        currentValue += '.';
+      }
+      updateDisplay();
+    }
+
+    function appendOperator(nextOperator) {
+      const inputValue = parseFloat(currentValue);
+
+      if (previousValue === null) {
+        previousValue = inputValue;
+      } else if (operator) {
+        const result = performCalculation();
+        currentValue = String(result);
+        previousValue = result;
+      }
+
+      waitingForOperand = true;
+      operator = nextOperator;
+      
+      const opSymbol = nextOperator === '*' ? '×' : nextOperator === '/' ? '÷' : nextOperator === '-' ? '−' : nextOperator;
+      expression = `${previousValue} ${opSymbol}`;
+      updateDisplay();
+    }
+
+    function performCalculation() {
+      const inputValue = parseFloat(currentValue);
+      
+      if (previousValue === null) {
+        return inputValue;
+      }
+
+      let result = previousValue;
+
+      switch (operator) {
+        case '+':
+          result = previousValue + inputValue;
+          break;
+        case '-':
+          result = previousValue - inputValue;
+          break;
+        case '*':
+          result = previousValue * inputValue;
+          break;
+        case '/':
+          if (inputValue === 0) {
+            return 'Nie je možné deliť nulou';
+          }
+          result = previousValue / inputValue;
+          break;
+      }
+
+      return Math.round(result * 100000000) / 100000000;
+    }
+
+    function calculate() {
+      const inputValue = parseFloat(currentValue);
+
+      if (operator && previousValue !== null) {
+        const opSymbol = operator === '*' ? '×' : operator === '/' ? '÷' : operator === '-' ? '−' : operator;
+        expression = `${previousValue} ${opSymbol} ${inputValue} =`;
+        
+        const result = performCalculation();
+        currentValue = String(result);
+        previousValue = null;
+        operator = null;
+        waitingForOperand = true;
+        updateDisplay();
+      }
+    }
+
+    function clearAll() {
+      currentValue = '0';
+      previousValue = null;
+      operator = null;
+      waitingForOperand = false;
+      expression = '';
+      display.className = 'display';
+      updateDisplay();
+    }
+
+    function clearEntry() {
+      currentValue = '0';
+      display.className = 'display';
+      updateDisplay();
+    }
+
+    function backspace() {
+      if (currentValue === '0' || waitingForOperand) {
+        return;
+      }
+      
+      currentValue = currentValue.slice(0, -1);
+      if (currentValue === '' || currentValue === '-') {
+        currentValue = '0';
+      }
+      updateDisplay();
+    }
+
+    function percentage() {
+      const inputValue = parseFloat(currentValue);
+      
+      if (operator && previousValue !== null) {
+        // Windows štýl: 200 + 10% = 200 + (200 * 10 / 100) = 220
+        const percentValue = (previousValue * inputValue) / 100;
+        currentValue = String(percentValue);
+      } else {
+        // Bez operátora: 50% = 0.5
+        currentValue = String(inputValue / 100);
+      }
+      
+      updateDisplay();
+    }
+
+    function negate() {
+      const value = parseFloat(currentValue);
+      currentValue = String(-value);
+      updateDisplay();
+    }
+
+    function square() {
+      const value = parseFloat(currentValue);
+      const result = value * value;
+      
+      if (operator && previousValue !== null) {
+        const opSymbol = operator === '*' ? '×' : operator === '/' ? '÷' : operator === '-' ? '−' : operator;
+        expression = `${previousValue} ${opSymbol} sqr(${value})`;
+      } else {
+        expression = `sqr(${value})`;
+      }
+      
+      currentValue = String(result);
+      waitingForOperand = true;
+      updateDisplay();
+    }
+
+    function squareRoot() {
+      const value = parseFloat(currentValue);
+      
+      if (value < 0) {
+        currentValue = 'Neplatný vstup';
+        display.className = 'display error';
+        updateDisplay();
+        return;
+      }
+      
+      const result = Math.sqrt(value);
+      
+      if (operator && previousValue !== null) {
+        const opSymbol = operator === '*' ? '×' : operator === '/' ? '÷' : operator === '-' ? '−' : operator;
+        expression = `${previousValue} ${opSymbol} √(${value})`;
+      } else {
+        expression = `√(${value})`;
+      }
+      
+      currentValue = String(Math.round(result * 100000000) / 100000000);
+      waitingForOperand = true;
+      updateDisplay();
+    }
+
+    function inverse() {
+      const value = parseFloat(currentValue);
+      
+      if (value === 0) {
+        currentValue = 'Nie je možné deliť nulou';
+        display.className = 'display error';
+        updateDisplay();
+        return;
+      }
+      
+      const result = 1 / value;
+      
+      if (operator && previousValue !== null) {
+        const opSymbol = operator === '*' ? '×' : operator === '/' ? '÷' : operator === '-' ? '−' : operator;
+        expression = `${previousValue} ${opSymbol} 1/(${value})`;
+      } else {
+        expression = `1/(${value})`;
+      }
+      
+      currentValue = String(Math.round(result * 100000000) / 100000000);
+      waitingForOperand = true;
+      updateDisplay();
+    }
+
+    function adjustFontSize() {
+      const length = currentValue.length;
+      display.classList.remove('small', 'smaller', 'error');
+      
+      if (length > 12) {
+        display.classList.add('smaller');
+      } else if (length > 8) {
+        display.classList.add('small');
+      }
+      
+      if (currentValue.includes('Nie je možné') || currentValue.includes('Neplatný')) {
+        display.classList.add('error');
+      }
+    }
+
+    // Podpora klávesnice
+    document.addEventListener('keydown', (e) => {
+      if (e.key >= '0' && e.key <= '9') {
+        e.preventDefault();
+        appendNumber(e.key);
+      } else if (e.key === '.') {
+        e.preventDefault();
+        appendDecimal();
+      } else if (e.key === '+') {
+        e.preventDefault();
+        appendOperator('+');
+      } else if (e.key === '-') {
+        e.preventDefault();
+        appendOperator('-');
+      } else if (e.key === '*') {
+        e.preventDefault();
+        appendOperator('*');
+      } else if (e.key === '/') {
+        e.preventDefault();
+        appendOperator('/');
+      } else if (e.key === 'Enter' || e.key === '=') {
+        e.preventDefault();
+        calculate();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        clearAll();
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        backspace();
+      } else if (e.key === '%') {
+        e.preventDefault();
+        percentage();
+      }
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>
