@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Prevodník jednotiek</title>
+<style>
+:root {
+  --bg-start: #0a1929;
+  --bg-end: #1a237e;
+  --surface: rgba(30, 41, 59, 0.9);
+  --surface-hover: rgba(45, 56, 79, 0.95);
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-glow: rgba(59, 130, 246, 0.4);
+  --text: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border: rgba(255, 255, 255, 0.1);
+  --radius: 20px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 25px 60px rgba(0, 0, 0, 0.6);
+}
+
+.theme-light {
+  --bg-start: #e0f2fe;
+  --bg-end: #bfdbfe;
+  --surface: rgba(255, 255, 255, 0.95);
+  --surface-hover: rgba(248, 250, 252, 1);
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: rgba(0, 0, 0, 0.08);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.15);
+  --accent-glow: rgba(59, 130, 246, 0.2);
+}
+
+.theme-purple {
+  --accent: #a855f7;
+  --accent-hover: #9333ea;
+  --accent-glow: rgba(168, 85, 247, 0.4);
+}
+
+.theme-green {
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --accent-glow: rgba(16, 185, 129, 0.4);
+}
+
+.theme-orange {
+  --accent: #f59e0b;
+  --accent-hover: #d97706;
+  --accent-glow: rgba(245, 158, 11, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", "Roboto", system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  transition: var(--transition);
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, var(--accent-glow) 0%, transparent 70%);
+  animation: bgRotate 30s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes bgRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.app {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  animation: fadeInScale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes fadeInScale {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px) scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+#menu {
+  display: flex;
+  flex-direction: column;
+  padding: 32px 24px;
+  gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+#menu::-webkit-scrollbar { width: 8px; }
+#menu::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+#menu::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+.menu-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.menu-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+
+.menu-category {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 16px 0 8px 8px;
+}
+
+.menu-btn {
+  background: var(--surface-hover);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: translateX(4px);
+  box-shadow: 0 8px 20px var(--accent-glow);
+  border-color: transparent;
+}
+
+.section {
+  display: none !important;
+  padding: 28px 24px;
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.section::-webkit-scrollbar { width: 8px; }
+.section::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+.section::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.section.active { display: block !important; }
+
+.back-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.back-btn {
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.back-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: translateX(-2px);
+}
+
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.calc-display {
+  width: 100%;
+  background: #000;
+  color: #00e5ff;
+  font-size: 2.2rem;
+  font-weight: 600;
+  text-align: right;
+  border: none;
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+  font-family: "Courier New", monospace;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.calc-grid button {
+  padding: 22px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.calc-grid button:hover { transform: translateY(-2px); }
+.calc-grid .accent { 
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+  border: none;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.converter {
+  background: var(--surface-hover);
+  border-radius: var(--radius);
+  padding: 24px;
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 16px;
+}
+
+.converter label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: -8px;
+}
+
+.converter select,
+.converter input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 1.05rem;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.converter input:focus,
+.converter select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.converter button {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 16px var(--accent-glow);
+  margin-top: 8px;
+}
+
+.converter button:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px var(--accent-glow);
+}
+
+.result {
+  margin-top: 8px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--accent);
+  min-height: 2em;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.settings {
+  display: grid;
+  gap: 20px;
+}
+
+.card {
+  background: var(--surface-hover);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.card label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1.05rem;
+}
+
+.card input[type="checkbox"],
+.card input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.card select {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn {
+  width: 100%;
+  background: var(--surface-hover);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn:hover { 
+  background: var(--accent);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.theme-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.theme-option {
+  padding: 14px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  text-align: center;
+  font-weight: 600;
+  transition: var(--transition);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.theme-option:hover { transform: scale(1.05); }
+
+.theme-option.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+
+.small {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .calc-display { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+<div class="app" role="application" aria-label="Prevodník jednotiek">
+  <div id="menu" aria-label="Hlavné menu">
+    <div class="menu-header">
+      <div class="menu-title">Prevodník jednotiek</div>
+    </div>
+
+    <div class="menu-category">🧮 Nástroje</div>
+    <button class="menu-btn" onclick="openSection('calc')"><span>🧮</span> Kalkulačka</button>
+
+    <div class="menu-category">📐 Jednotky</div>
+    <button class="menu-btn" onclick="openConverter('dlzka')"><span>📏</span> Dĺžka</button>
+    <button class="menu-btn" onclick="openConverter('hmotnost')"><span>⚖️</span> Hmotnosť</button>
+    <button class="menu-btn" onclick="openConverter('teplota')"><span>🌡️</span> Teplota</button>
+    <button class="menu-btn" onclick="openConverter('cas')"><span>⏰</span> Čas</button>
+    <button class="menu-btn" onclick="openConverter('rychlost')"><span>🚀</span> Rýchlosť</button>
+    <button class="menu-btn" onclick="openConverter('objem')"><span>🥛</span> Objem</button>
+    <button class="menu-btn" onclick="openConverter('plocha')"><span>🧱</span> Plocha</button>
+    <button class="menu-btn" onclick="openConverter('energia')"><span>⚡</span> Energia</button>
+    <button class="menu-btn" onclick="openConverter('vykon')"><span>💡</span> Výkon</button>
+    <button class="menu-btn" onclick="openConverter('tlak')"><span>🌬️</span> Tlak</button>
+    <button class="menu-btn" onclick="openConverter('sila')"><span>💪</span> Sila</button>
+    <button class="menu-btn" onclick="openConverter('frekvencia')"><span>📻</span> Frekvencia</button>
+    <button class="menu-btn" onclick="openConverter('elektrina')"><span>🔌</span> El. prúd</button>
+    <button class="menu-btn" onclick="openConverter('data')"><span>💾</span> Dáta</button>
+    <button class="menu-btn" onclick="openConverter('prenos')"><span>📶</span> Prenos</button>
+    <button class="menu-btn" onclick="openConverter('kuchyna')"><span>🍳</span> Kuchyna</button>
+    <button class="menu-btn" onclick="openConverter('uhol')"><span>📐</span> Uhol</button>
+    <button class="menu-btn" onclick="openConverter('hustota')"><span>🧊</span> Hustota</button>
+
+    <div class="menu-category">⚙️ Nastavenia</div>
+    <button class="menu-btn" onclick="openSection('settings')"><span>⚙️</span> Nastavenia</button>
+  </div>
+
+  <div id="calc" class="section" aria-label="Kalkulačka">
+    <div class="back-bar">
+      <a class="back-btn" onclick="backToMenu()">← Späť</a>
+      <h3 class="section-title">Kalkulačka</h3>
+    </div>
+    <input type="text" id="display" class="calc-display" readonly placeholder="0">
+    <div class="calc-grid">
+      <button onclick="addCalc('7')">7</button>
+      <button onclick="addCalc('8')">8</button>
+      <button onclick="addCalc('9')">9</button>
+      <button onclick="addCalc('/')">÷</button>
+
+      <button onclick="addCalc('4')">4</button>
+      <button onclick="addCalc('5')">5</button>
+      <button onclick="addCalc('6')">6</button>
+      <button onclick="addCalc('*')">×</button>
+
+      <button onclick="addCalc('1')">1</button>
+      <button onclick="addCalc('2')">2</button>
+      <button onclick="addCalc('3')">3</button>
+      <button onclick="addCalc('-')">−</button>
+
+      <button onclick="addCalc('0')">0</button>
+      <button onclick="addCalc('.')">.</button>
+      <button class="accent" onclick="calculate()">=</button>
+      <button onclick="addCalc('+')">+</button>
+
+      <button class="accent" onclick="clearDisplay()" style="grid-column: span 2;">AC</button>
+      <button onclick="backspace()" style="grid-column: span 2;">⌫</button>
+    </div>
+  </div>
+
+  <div id="converter" class="section" aria-label="Konvertor">
+    <div class="back-bar">
+      <a class="back-btn" onclick="backToMenu()">← Späť</a>
+      <h3 id="convTitle" class="section-title"></h3>
+    </div>
+    <div class="converter" role="form">
+      <label for="convValue">Hodnota</label>
+      <input type="number" id="convValue" placeholder="Zadajte hodnotu" inputmode="decimal" step="any" oninput="autoConvert()">
+      <span class="small">Automatický prevod pri písaní</span>
+
+      <label for="fromUnit">Z jednotky</label>
+      <select id="fromUnit" onchange="autoConvert()"></select>
+
+      <label for="toUnit">Na jednotku</label>
+      <select id="toUnit" onchange="autoConvert()"></select>
+
+      <button onclick="convertUnits()">🔄 Prepočítať</button>
+      <div class="result" id="convResult" aria-live="polite">Zadajte hodnotu</div>
+    </div>
+  </div>
+
+  <div id="settings" class="section settings" aria-label="Nastavenia">
+    <div class="back-bar">
+      <a class="back-btn" onclick="backToMenu()">← Späť</a>
+      <h3 class="section-title">Nastavenia</h3>
+    </div>
+
+    <div class="card">
+      <label>
+        <input type="checkbox" id="darkMode" checked onchange="toggleTheme()">
+        Tmavý režim
+      </label>
+      <div class="small">Prepne medzi tmavým a svetlým režimom</div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight: 600; font-size: 1.05rem;">🎨 Farebná téma</div>
+      <div class="theme-selector">
+        <div class="theme-option theme-blue active" onclick="setColorTheme('blue')">Modrá</div>
+        <div class="theme-option theme-purple" onclick="setColorTheme('purple')">Fialová</div>
+        <div class="theme-option theme-green" onclick="setColorTheme('green')">Zelená</div>
+        <div class="theme-option theme-orange" onclick="setColorTheme('orange')">Oranžová</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <label for="precision">🔢 Presnosť: <span id="precisionValue">4</span></label>
+      <input type="range" id="precision" min="2" max="12" value="4" oninput="updatePrecision(this.value)" style="width: 100%;">
+      <div class="small">Počet desatinných miest</div>
+    </div>
+
+    <div class="card">
+      <label for="numberFormat">🌍 Formát čísiel</label>
+      <select id="numberFormat" onchange="updateNumberFormat()">
+        <option value="sk">Evropský (1 234,56)</option>
+        <option value="en">Anglo-americký (1,234.56)</option>
+      </select>
+      <div class="small">Formát zobrazenia čísiel</div>
+    </div>
+
+    <div class="card">
+      <button class="btn" onclick="clearHistory()">🗑️ Vymazať údaje</button>
+      <div class="small">Vymaže všetky nastavenia a históriu</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const translations = {
+  sk: {
+    calcTitle: "Kalkulačka",
+    discountTitle: "Počítač zliav",
+    depositTitle: "Záloha na fľaše",
+    back: "← Späť",
+    add: "+ Pridať",
+    remove: "✕ Odstrániť",
+    percent: "% Percentá",
+    euro: "€ Eurá",
+    originalPrice: "Pôvodná cena:",
+    totalDiscount: "Celková zľava:",
+    finalPrice: "Výsledná cena:",
+    bottlesTotal: "Spolu za fľaše:",
+    cratesTotal: "Spolu za prepravky:",
+    grandTotal: "Celková záloha:",
+    enterValue: "Zadajte hodnotu",
+    history: "História prevodov",
+    settings: "Nastavenia"
+  },
+  en: {
+    calcTitle: "Calculator",
+    discountTitle: "Discount Calculator",
+    depositTitle: "Bottle Deposit",
+    back: "← Back",
+    add: "+ Add",
+    remove: "✕ Remove",
+    percent: "% Percent",
+    euro: "€ Euro",
+    originalPrice: "Original price:",
+    totalDiscount: "Total discount:",
+    finalPrice: "Final price:",
+    bottlesTotal: "Total for bottles:",
+    cratesTotal: "Total for crates:",
+    grandTotal: "Total deposit:",
+    enterValue: "Enter value",
+    history: "Conversion History",
+    settings: "Settings"
+  },
+  de: {
+    calcTitle: "Rechner",
+    discountTitle: "Rabattrechner",
+    depositTitle: "Pfandflaschen",
+    back: "← Zurück",
+    add: "+ Hinzufügen",
+    remove: "✕ Entfernen",
+    percent: "% Prozent",
+    euro: "€ Euro",
+    originalPrice: "Originalpreis:",
+    totalDiscount: "Gesamtrabatt:",
+    finalPrice: "Endpreis:",
+    bottlesTotal: "Gesamt für Flaschen:",
+    cratesTotal: "Gesamt für Kisten:",
+    grandTotal: "Gesamtpfand:",
+    enterValue: "Wert eingeben",
+    history: "Konvertierungsverlauf",
+    settings: "Einstellungen"
+  },
+  cs: {
+    calcTitle: "Kalkulačka",
+    discountTitle: "Kalkulátor slev",
+    depositTitle: "Záloha na lahve",
+    back: "← Zpět",
+    add: "+ Přidat",
+    remove: "✕ Odstranit",
+    percent: "% Procenta",
+    euro: "€ Euro",
+    originalPrice: "Původní cena:",
+    totalDiscount: "Celková sleva:",
+    finalPrice: "Konečná cena:",
+    bottlesTotal: "Celkem za lahve:",
+    cratesTotal: "Celkem za přepravy:",
+    grandTotal: "Celková záloha:",
+    enterValue: "Zadejte hodnotu",
+    history: "Historie převodů",
+    settings: "Nastavení"
+  }
+};
+
+let settings = { 
+  darkMode: true, 
+  highContrast: false,
+  colorTheme: 'blue', 
+  precision: 4, 
+  numberFormat: 'sk',
+  fontSize: 'normal',
+  cornerRadius: 100,
+  animations: true,
+  language: 'sk',
+  calcType: 'basic',
+  defaultLength: 'm',
+  defaultWeight: 'kg',
+  defaultVolume: 'l',
+  bottlePrices: { can: 0.15, glass: 0.13, plastic: 0.15, crate1: 1.66, crate2: 3.32 },
+  customItems: []
+};
+
+let discounts = [];
+let depositItems = { can: 0, glass: 0, plastic: 0, crate1: 0, crate2: 0 };
+let conversionHistory = [];
+
+function t(key) {
+  return translations[settings.language]?.[key] || translations.sk[key];
+}
+
+function openSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById(id).classList.add('active');
+  
+  if(id === 'settings') {
+    document.getElementById('darkMode').checked = settings.darkMode;
+    document.getElementById('highContrast').checked = settings.highContrast;
+    document.getElementById('precision').value = settings.precision;
+    document.getElementById('precisionValue').textContent = settings.precision;
+    document.getElementById('numberFormat').value = settings.numberFormat;
+    document.getElementById('fontSize').value = settings.fontSize;
+    document.getElementById('cornerRadius').value = settings.cornerRadius;
+    document.getElementById('cornerRadiusValue').textContent = settings.cornerRadius + '%';
+    document.getElementById('animations').checked = settings.animations;
+    document.getElementById('language').value = settings.language;
+    document.getElementById('calcType').value = settings.calcType;
+    document.getElementById('dualPanel').checked = settings.dualPanel;
+    
+    document.getElementById('priceCan').value = settings.bottlePrices.can;
+    document.getElementById('priceGlass').value = settings.bottlePrices.glass;
+    document.getElementById('pricePlastic').value = settings.bottlePrices.plastic;
+    document.getElementById('priceCrate1').value = settings.bottlePrices.crate1;
+    document.getElementById('priceCrate2').value = settings.bottlePrices.crate2;
+    
+    document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+    document.querySelector(`.theme-${settings.colorTheme}`).classList.add('active');
+  }
+  
+  if(id === 'history') {
+    refreshHistory();
+  }
+}
+
+function backToMenu() {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('menu').style.display = 'flex';
+}
+
+const display = document.getElementById('display');
+
+function addCalc(v) { display.value += v; }
+function clearDisplay() { display.value = ''; }
+function backspace() { display.value = display.value.slice(0, -1); }
+
+function calculate() {
+  try {
+    const expr = display.value.replace(/,/g,'.').replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+    const result = Function('"use strict"; return (' + expr + ')')();
+    display.value = formatNumber(result);
+  } catch {
+    display.value = 'Chyba';
+    setTimeout(() => clearDisplay(), 1500);
+  }
+}
+
+const converters = {
+  dlzka: { m: 1, km: 1000, cm: 0.01, mm: 0.001, μm: 1e-6, nm: 1e-9, mi: 1609.344, yd: 0.9144, ft: 0.3048, in: 0.0254, "naut mi": 1852, "light year": 9.461e15, AU: 1.496e11 },
+  hmotnost: { kg: 1, g: 0.001, mg: 1e-6, μg: 1e-9, t: 1000, kt: 1e6, lb: 0.45359237, oz: 0.028349523125, stone: 6.35029318, ton: 907.18474 },
+  teplota: { convert: (v,from,to)=>{ let c; if(from === "°C") c = v; else if(from === "°F") c = (v-32)*5/9; else if(from === "K") c = v - 273.15; else if(from === "°R") c = (v - 491.67) * 5/9; if(to === "°C") return c; if(to === "°F") return c*9/5+32; if(to === "K") return c+273.15; if(to === "°R") return (c + 273.15) * 9/5; return v; }, units: ["°C","°F","K","°R"] },
+  cas: { ns: 1e-9, μs: 1e-6, ms: 0.001, s: 1, min: 60, h: 3600, day: 86400, week: 604800, month: 2628000, year: 31557600, decade: 315576000 },
+  rychlost: { "m/s": 1, "km/h": 0.2777777778, "mph": 0.44704, "ft/s": 0.3048, "knot": 0.5144444444, "Mach": 343 },
+  objem: { l: 1, ml: 0.001, cl: 0.01, dl: 0.1, cm3: 0.001, m3: 1000, gal: 3.785411784, "gal (UK)": 4.54609, qt: 0.946352946, pint: 0.473176473, cup: 0.24, "fl oz": 0.0295735295625, "fl oz (UK)": 0.0284130625, tbsp: 0.01478676478125, tsp: 0.00492892159375, bbl: 158.987294928 },
+  plocha: { "m²": 1, "cm²": 0.0001, "mm²": 1e-6, "km²": 1e6, ha: 10000, a: 100, "ft²": 0.09290304, "in²": 0.00064516, "yd²": 0.83612736, acre: 4046.8564224, "mi²": 2589988.110336 },
+  energia: { J: 1, kJ: 1000, MJ: 1e6, GJ: 1e9, cal: 4.184, kcal: 4184, Wh: 3600, kWh: 3.6e6, MWh: 3.6e9, eV: 1.602176634e-19, BTU: 1055.05585262, "ft·lbf": 1.3558179483314004 },
+  vykon: { W: 1, kW: 1000, MW: 1e6, GW: 1e9, HP: 745.6998715822702, "HP (UK)": 745.69987158227, "BTU/h": 0.29307107017 },
+  tlak: { Pa: 1, kPa: 1000, MPa: 1e6, GPa: 1e9, bar: 100000, mbar: 100, atm: 101325, psi: 6894.757293168, torr: 133.322387415, mmHg: 133.322387415 },
+  sila: { N: 1, kN: 1000, MN: 1e6, dyn: 1e-5, lbf: 4.4482216152605, kgf: 9.80665, ozf: 0.27801385095378125 },
+  frekvencia: { Hz: 1, kHz: 1000, MHz: 1e6, GHz: 1e9, THz: 1e12, rpm: 1/60, "rad/s": 1/(2*Math.PI) },
+  elektrina: { A: 1, mA: 0.001, μA: 1e-6, kA: 1000, V: 1, mV: 0.001, kV: 1000, MV: 1e6, Ω: 1, mΩ: 0.001, kΩ: 1000, MΩ: 1e6, W: 1, mW: 0.001, kW: 1000 },
+  data: { B: 1, KB: 1024, MB: 1048576, GB: 1073741824, TB: 1099511627776, PB: 1125899906842624, bit: 0.125, Kb: 128, Mb: 131072, Gb: 134217728, Tb: 137438953472 },
+  prenos: { "b/s": 0.125, "Kb/s": 128, "Mb/s": 131072, "Gb/s": 134217728, "B/s": 1, "KB/s": 1024, "MB/s": 1048576, "GB/s": 1073741824 },
+  kuchyna: { ml: 1, l: 1000, dl: 100, cl: 10, "šálka": 240, "polievková lyžica": 15, "čajová lyžička": 5, "polievková lyžica (UK)": 17.7582, "čajová lyžička (UK)": 5.9194, "cup (US)": 236.588, "tbsp (US)": 14.7868, "tsp (US)": 4.92892, "fl oz (US)": 29.5735, "pint (US)": 473.176, "qt (US)": 946.353, "gal (US)": 3785.41 },
+  uhol: { "°": 1, rad: 57.2957795131, grad: 0.9, arcmin: 1/60, arcsec: 1/3600, turn: 360, mrad: 0.0572957795131 },
+  hustota: { "kg/m³": 1, "g/cm³": 1000, "kg/l": 1000, "g/ml": 1000, "lb/ft³": 16.0184633739601, "lb/in³": 27679.9047102031, "oz/gal": 7.4891517645772 }
+};
+
+let currentConv = '';
+const convTitle = document.getElementById('convTitle');
+const fromSel = document.getElementById('fromUnit');
+const toSel = document.getElementById('toUnit');
+const convValueEl = document.getElementById('convValue');
+const convResult = document.getElementById('convResult');
+
+function openConverter(type) {
+  openSection('converter');
+  currentConv = type;
+  
+  const titles = { dlzka: "Dĺžka", hmotnost: "Hmotnosť", teplota: "Teplota", cas: "Čas", rychlost: "Rýchlosť", objem: "Objem", plocha: "Plocha", energia: "Energia", vykon: "Výkon", tlak: "Tlak", sila: "Sila", frekvencia: "Frekvencia", elektrina: "Elektrický prúd", data: "Dátový objem", prenos: "Prenosová rýchlosť", kuchyna: "Kuchynské miery", uhol: "Uhol", hustota: "Hustota" };
+  
+  convTitle.textContent = titles[type] || type;
+  fromSel.innerHTML = '';
+  toSel.innerHTML = '';
+
+  const conv = converters[type];
+  if(conv.units) {
+    conv.units.forEach(u => {
+      fromSel.innerHTML += `<option value="${u}">${u}</option>`;
+      toSel.innerHTML += `<option value="${u}">${u}</option>`;
+    });
+  } else {
+    for(const u in conv) {
+      fromSel.innerHTML += `<option value="${u}">${u}</option>`;
+      toSel.innerHTML += `<option value="${u}">${u}</option>`;
+    }
+  }
+
+  if(type === 'dlzka') fromSel.value = toSel.value = settings.defaultLength;
+  if(type === 'hmotnost') fromSel.value = toSel.value = settings.defaultWeight;
+  if(type === 'objem') fromSel.value = toSel.value = settings.defaultVolume;
+
+  convValueEl.value = '';
+  convResult.textContent = t('enterValue');
+}
+
+function formatNumber(num) {
+  if(num === null || num === undefined || isNaN(num)) return '';
+  const locale = settings.numberFormat === 'sk' ? 'sk-SK' : 'en-US';
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: settings.precision, minimumFractionDigits: 0 }).format(num);
+}
+
+function convertUnits() {
+  const raw = (convValueEl.value || '').toString().trim();
+  if(!raw) { convResult.textContent = t('enterValue'); return; }
+  
+  const value = parseFloat(raw.replace(',','.'));
+  if(Number.isNaN(value)) { convResult.textContent = '❌ Neplatná hodnota'; return; }
+
+  const from = fromSel.value;
+  const to = toSel.value;
+
+  let result;
+  if(converters[currentConv].convert) {
+    result = converters[currentConv].convert(value, from, to);
+  } else {
+    const base = value * converters[currentConv][from];
+    result = base / converters[currentConv][to];
+  }
+  
+  const historyEntry = `${formatNumber(value)} ${from} = ${formatNumber(result)} ${to}`;
+  conversionHistory.unshift(historyEntry);
+  if(conversionHistory.length > 20) conversionHistory.pop();
+  
+  convResult.innerHTML = `<div style="font-size: 1.2rem; font-weight: 700;">${historyEntry}</div>`;
+}
+
+function autoConvert() {
+  if(convValueEl.value) convertUnits();
+}
+
+function refreshHistory() {
+  const list = document.getElementById('historyList');
+  list.innerHTML = '';
+  if(conversionHistory.length === 0) {
+    list.innerHTML = '<div style="color: var(--text-secondary);">Zatiaľ žiadne konverzie</div>';
+    return;
+  }
+  conversionHistory.forEach(entry => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.textContent = entry;
+    list.appendChild(div);
+  });
+}
+
+function clearConversionHistory() {
+  if(confirm('Vymazať históriu prevodov?')) {
+    conversionHistory = [];
+    refreshHistory();
+  }
+}
+
+function addDiscount() {
+  const id = Date.now();
+  discounts.push({ id, type: 'percent', value: 0 });
+  renderDiscounts();
+  calculateDiscount();
+}
+
+function removeDiscount(id) {
+  discounts = discounts.filter(d => d.id !== id);
+  renderDiscounts();
+  calculateDiscount();
+}
+
+function renderDiscounts() {
+  const list = document.getElementById('discountsList');
+  list.innerHTML = '';
+  
+  discounts.forEach(d => {
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'discount-item';
+    
+    const typeRow = document.createElement('div');
+    typeRow.className = 'discount-type-row';
+    typeRow.style.display = 'flex';
+    typeRow.style.gap = '8px';
+    
+    const percentBtn = document.createElement('button');
+    percentBtn.textContent = '%';
+    percentBtn.className = 'add-discount-btn';
+    percentBtn.style.flex = '1';
+    percentBtn.style.marginTop = '0';
+    if(d.type === 'percent') {
+      percentBtn.style.background = 'var(--accent)';
+      percentBtn.style.color = 'white';
+      percentBtn.style.borderColor = 'var(--accent)';
+    }
+    percentBtn.onclick = () => {
+      d.type = 'percent';
+      d.value = 0;
+      renderDiscounts();
+      calculateDiscount();
+    };
+    
+    const euroBtn = document.createElement('button');
+    euroBtn.textContent = '€';
+    euroBtn.className = 'add-discount-btn';
+    euroBtn.style.flex = '1';
+    euroBtn.style.marginTop = '0';
+    if(d.type === 'fixed') {
+      euroBtn.style.background = 'var(--accent)';
+      euroBtn.style.color = 'white';
+      euroBtn.style.borderColor = 'var(--accent)';
+    }
+    euroBtn.onclick = () => {
+      d.type = 'fixed';
+      d.value = 0;
+      renderDiscounts();
+      calculateDiscount();
+    };
+    
+    typeRow.appendChild(percentBtn);
+    typeRow.appendChild(euroBtn);
+    
+    const valueInput = document.createElement('input');
+    valueInput.type = 'number';
+    valueInput.step = '0.01';
+    valueInput.min = '0';
+    valueInput.value = d.value;
+    valueInput.placeholder = d.type === 'percent' ? '0-100' : '0.00';
+    valueInput.oninput = (e) => {
+      d.value = parseFloat(e.target.value) || 0;
+      calculateDiscount();
+    };
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = t('remove');
+    removeBtn.className = 'discount-remove-btn';
+    removeBtn.onclick = () => removeDiscount(d.id);
+    
+    itemDiv.appendChild(typeRow);
+    itemDiv.appendChild(valueInput);
+    itemDiv.appendChild(removeBtn);
+    list.appendChild(itemDiv);
+  });
+}
+
+function calculateDiscount() {
+  const priceInput = document.getElementById('origPrice');
+  const price = parseFloat((priceInput.value || '0').replace(',', '.'));
+  
+  if(!price || price <= 0) {
+    document.getElementById('discountResults').style.display = 'none';
+    return;
+  }
+  
+  let totalDiscount = 0;
+  let workingPrice = price;
+  
+  discounts.forEach(d => {
+    if(d.type === 'percent') {
+      const discount = workingPrice * (d.value / 100);
+      totalDiscount += discount;
+      workingPrice -= discount;
+    } else {
+      totalDiscount += d.value;
+      workingPrice -= d.value;
+    }
+  });
+  
+  const finalPrice = Math.max(0, workingPrice);
+  
+  document.getElementById('resultOriginal').textContent = formatNumber(price) + ' €';
+  document.getElementById('resultDiscountTotal').textContent = '−' + formatNumber(totalDiscount) + ' €';
+  document.getElementById('resultFinal').textContent = formatNumber(finalPrice) + ' €';
+  document.getElementById('discountResults').style.display = 'grid';
+}
+
+function initDepositItems() {
+  const container = document.getElementById('depositItems');
+  container.innerHTML = '';
+  
+  const items = [
+    { key: 'can', name: 'Plechovka', price: settings.bottlePrices.can, emoji: '🥫' },
+    { key: 'glass', name: 'Sklenená fľaša', price: settings.bottlePrices.glass, emoji: '🍾' },
+    { key: 'plastic', name: 'Plastová fľaša', price: settings.bottlePrices.plastic, emoji: '🪤' },
+    { key: 'crate1', name: 'Prepravka', price: settings.bottlePrices.crate1, emoji: '📦' },
+    { key: 'crate2', name: 'Prepravka veľká', price: settings.bottlePrices.crate2, emoji: '📦' }
+  ];
+  
+  // Pridať vlastné položky
+  settings.customItems.forEach((item, idx) => {
+    items.push({ key: 'custom_' + idx, name: item.name, price: item.price, emoji: item.emoji, isCustom: true, customIdx: idx });
+  });
+  
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'deposit-item';
+    
+    const info = document.createElement('div');
+    info.className = 'deposit-item-info';
+    
+    const name = document.createElement('div');
+    name.style.fontWeight = '600';
+    name.style.fontSize = '0.95rem';
+    name.textContent = `${item.emoji} ${item.name}`;
+    
+    const price = document.createElement('div');
+    price.style.fontSize = '0.85rem';
+    price.style.color = 'var(--text-secondary)';
+    price.textContent = `${formatNumber(item.price)} € / kus`;
+    
+    info.appendChild(name);
+    info.appendChild(price);
+    
+    const ctrlDiv = document.createElement('div');
+    ctrlDiv.style.display = 'flex';
+    ctrlDiv.style.gap = '8px';
+    ctrlDiv.style.alignItems = 'center';
+    
+    if(!depositItems[item.key]) depositItems[item.key] = 0;
+    
+    const minusBtn = document.createElement('button');
+    minusBtn.textContent = '−';
+    minusBtn.className = 'add-discount-btn';
+    minusBtn.style.width = '40px';
+    minusBtn.style.padding = '8px';
+    minusBtn.style.marginTop = '0';
+    minusBtn.onclick = () => {
+      if(depositItems[item.key] > 0) {
+        depositItems[item.key]--;
+        display.textContent = depositItems[item.key];
+        calculateDeposit();
+      }
+    };
+    
+    const display = document.createElement('span');
+    display.textContent = depositItems[item.key];
+    display.style.width = '40px';
+    display.style.textAlign = 'center';
+    display.style.fontWeight = '600';
+    display.style.minHeight = '40px';
+    display.style.display = 'flex';
+    display.style.alignItems = 'center';
+    display.style.justifyContent = 'center';
+    
+    const plusBtn = document.createElement('button');
+    plusBtn.textContent = '+';
+    plusBtn.className = 'add-discount-btn';
+    plusBtn.style.width = '40px';
+    plusBtn.style.padding = '8px';
+    plusBtn.style.marginTop = '0';
+    plusBtn.onclick = () => {
+      depositItems[item.key]++;
+      display.textContent = depositItems[item.key];
+      calculateDeposit();
+    };
+    
+    ctrlDiv.appendChild(minusBtn);
+    ctrlDiv.appendChild(display);
+    ctrlDiv.appendChild(plusBtn);
+    
+    div.appendChild(info);
+    div.appendChild(ctrlDiv);
+    container.appendChild(div);
+  });
+}
+
+function calculateDeposit() {
+  const bottlesTotal = (depositItems.can * settings.bottlePrices.can) + (depositItems.glass * settings.bottlePrices.glass) + (depositItems.plastic * settings.bottlePrices.plastic);
+  const cratesTotal = (depositItems.crate1 * settings.bottlePrices.crate1) + (depositItems.crate2 * settings.bottlePrices.crate2);
+  const grandTotal = bottlesTotal + cratesTotal;
+  
+  if(bottlesTotal === 0 && cratesTotal === 0) {
+    document.getElementById('depositResults').style.display = 'none';
+    return;
+  }
+  
+  document.getElementById('depositBottlesTotal').textContent = formatNumber(bottlesTotal) + ' €';
+  document.getElementById('depositCratesTotal').textContent = formatNumber(cratesTotal) + ' €';
+  document.getElementById('depositGrandTotal').textContent = formatNumber(grandTotal) + ' €';
+  document.getElementById('depositResults').style.display = 'grid';
+}
+
+function toggleTheme() {
+  settings.darkMode = document.getElementById('darkMode').checked;
+  settings.highContrast = document.getElementById('highContrast').checked;
+  applyTheme();
+}
+
+function setColorTheme(theme) {
+  settings.colorTheme = theme;
+  document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+  document.querySelector(`.theme-${theme}`).classList.add('active');
+  applyTheme();
+}
+
+function applyTheme() {
+  const body = document.body;
+  body.classList.remove('theme-light', 'theme-purple', 'theme-green', 'theme-orange', 'theme-high-contrast');
+  if(!settings.darkMode) body.classList.add('theme-light');
+  if(settings.highContrast) body.classList.add('theme-high-contrast');
+  if(settings.colorTheme !== 'blue') body.classList.add(`theme-${settings.colorTheme}`);
+}
+
+function updateLanguage() {
+  settings.language = document.getElementById('language').value;
+}
+
+function updateFontSize() {
+  settings.fontSize = document.getElementById('fontSize').value;
+  const sizes = { small: 0.85, normal: 1, large: 1.2 };
+  document.documentElement.style.setProperty('--font-size', sizes[settings.fontSize] + 'rem');
+}
+
+function updateCornerRadius(value) {
+  settings.cornerRadius = value;
+  document.getElementById('cornerRadiusValue').textContent = value + '%';
+  document.documentElement.style.setProperty('--corner-radius', value / 100);
+}
+
+function toggleAnimations() {
+  settings.animations = document.getElementById('animations').checked;
+  document.body.classList.toggle('no-animation', !settings.animations);
+}
+
+function updatePrecision(value) {
+  settings.precision = parseInt(value);
+  document.getElementById('precisionValue').textContent = value;
+  if(document.getElementById('convValue').value) autoConvert();
+  calculateDiscount();
+}
+
+function updateNumberFormat() {
+  settings.numberFormat = document.getElementById('numberFormat').value;
+  if(document.getElementById('convValue').value) autoConvert();
+  calculateDiscount();
+}
+
+function updateBottlePrices() {
+  settings.bottlePrices.can = parseFloat(document.getElementById('priceCan').value) || 0.15;
+  settings.bottlePrices.glass = parseFloat(document.getElementById('priceGlass').value) || 0.13;
+  settings.bottlePrices.plastic = parseFloat(document.getElementById('pricePlastic').value) || 0.15;
+  settings.bottlePrices.crate1 = parseFloat(document.getElementById('priceCrate1').value) || 1.66;
+  settings.bottlePrices.crate2 = parseFloat(document.getElementById('priceCrate2').value) || 3.32;
+  initDepositItems();
+  calculateDeposit();
+}
+
+function updateCalcType() {
+  settings.calcType = document.getElementById('calcType').value;
+}
+
+function toggleDualPanel() {
+  settings.dualPanel = document.getElementById('dualPanel').checked;
+  if(settings.dualPanel) {
+    document.querySelector('.app').style.maxWidth = '900px';
+    document.querySelector('.app').style.display = 'grid';
+    document.querySelector('.app').style.gridTemplateColumns = '1fr 1fr';
+  } else {
+    document.querySelector('.app').style.maxWidth = '560px';
+    document.querySelector('.app').style.display = 'flex';
+    document.querySelector('.app').style.gridTemplateColumns = 'auto';
+  }
+}
+
+function initDefaultUnits() {
+  const lengthSel = document.getElementById('defaultLength');
+  const weightSel = document.getElementById('defaultWeight');
+  const volumeSel = document.getElementById('defaultVolume');
+  
+  for(const u in converters.dlzka) {
+    const opt = document.createElement('option');
+    opt.value = u;
+    opt.textContent = u;
+    lengthSel.appendChild(opt);
+  }
+  
+  for(const u in converters.hmotnost) {
+    const opt = document.createElement('option');
+    opt.value = u;
+    opt.textContent = u;
+    weightSel.appendChild(opt);
+  }
+  
+  for(const u in converters.objem) {
+    const opt = document.createElement('option');
+    opt.value = u;
+    opt.textContent = u;
+    volumeSel.appendChild(opt);
+  }
+  
+  lengthSel.value = settings.defaultLength;
+  weightSel.value = settings.defaultWeight;
+  volumeSel.value = settings.defaultVolume;
+  
+  lengthSel.onchange = () => settings.defaultLength = lengthSel.value;
+  weightSel.onchange = () => settings.defaultWeight = weightSel.value;
+  volumeSel.onchange = () => settings.defaultVolume = volumeSel.value;
+}
+
+function addCustomItem() {
+  const name = document.getElementById('customItemName').value.trim();
+  const price = parseFloat(document.getElementById('customItemPrice').value);
+  const emoji = document.getElementById('customItemEmoji').value.trim() || '📦';
+  
+  if(!name) {
+    alert('Zadajte názov položky');
+    return;
+  }
+  
+  if(isNaN(price) || price < 0) {
+    alert('Zadajte platnú cenu');
+    return;
+  }
+  
+  settings.customItems.push({ name, price, emoji });
+  
+  document.getElementById('customItemName').value = '';
+  document.getElementById('customItemPrice').value = '';
+  document.getElementById('customItemEmoji').value = '';
+  
+  renderCustomItems();
+  initDepositItems();
+}
+
+function removeCustomItem(idx) {
+  settings.customItems.splice(idx, 1);
+  renderCustomItems();
+  initDepositItems();
+  calculateDeposit();
+}
+
+function renderCustomItems() {
+  const list = document.getElementById('customItemsList');
+  list.innerHTML = '';
+  
+  if(settings.customItems.length === 0) {
+    list.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.9rem;">Zatiaľ žiadne vlastné položky</div>';
+    return;
+  }
+  
+  settings.customItems.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.style.background = 'rgba(0, 0, 0, 0.15)';
+    div.style.borderRadius = 'calc(12px * var(--corner-radius, 1))';
+    div.style.padding = '12px';
+    div.style.marginBottom = '8px';
+    div.style.display = 'flex';
+    div.style.justifyContent = 'space-between';
+    div.style.alignItems = 'center';
+    
+    const info = document.createElement('div');
+    info.innerHTML = `<div style="font-weight: 600;">${item.emoji} ${item.name}</div><div style="font-size: 0.85rem; color: var(--text-secondary);">${formatNumber(item.price)} €</div>`;
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = '✕';
+    removeBtn.className = 'add-discount-btn';
+    removeBtn.style.width = '36px';
+    removeBtn.style.padding = '6px';
+    removeBtn.style.marginTop = '0';
+    removeBtn.style.background = 'rgba(255, 59, 48, 0.2)';
+    removeBtn.style.color = '#ff3b30';
+    removeBtn.style.borderColor = 'rgba(255, 59, 48, 0.3)';
+    removeBtn.onclick = () => removeCustomItem(idx);
+    
+    div.appendChild(info);
+    div.appendChild(removeBtn);
+    list.appendChild(div);
+  });
+}
+
+function clearAllSettings() {
+  if(confirm('Vrátiť všetky nastavenia na predvolené hodnoty?')) {
+    settings = { 
+      darkMode: true, 
+      highContrast: false,
+      colorTheme: 'blue', 
+      precision: 4, 
+      numberFormat: 'sk',
+      fontSize: 'normal',
+      cornerRadius: 100,
+      animations: true,
+      language: 'sk',
+      calcType: 'basic',
+      defaultLength: 'm',
+      defaultWeight: 'kg',
+      defaultVolume: 'l',
+      bottlePrices: { can: 0.15, glass: 0.13, plastic: 0.15, crate1: 1.66, crate2: 3.32 },
+      customItems: []
+    };
+    
+    applyTheme();
+    updateFontSize();
+    updateCornerRadius(100);
+    toggleAnimations();
+    initDepositItems();
+    renderCustomItems();
+    conversionHistory = [];
+    discounts = [];
+    renderDiscounts();
+    
+    document.getElementById('darkMode').checked = true;
+    document.getElementById('highContrast').checked = false;
+    document.getElementById('language').value = 'sk';
+    document.getElementById('fontSize').value = 'normal';
+    document.getElementById('cornerRadius').value = 100;
+    document.getElementById('animations').checked = true;
+    document.getElementById('numberFormat').value = 'sk';
+    document.getElementById('precision').value = 4;
+    document.getElementById('calcType').value = 'basic';
+    
+    alert('✅ Všetky nastavenia boli vrátené na predvolené hodnoty!');
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  initDefaultUnits();
+  renderCustomItems();
+  applyTheme();
+  updateFontSize();
+  updateCornerRadius(settings.cornerRadius);
+  backToMenu();
+  initDepositItems();
+});
+
+document.addEventListener('keydown', (e) => {
+  if(document.getElementById('calc').classList.contains('active')) {
+    if(e.key >= '0' && e.key <= '9') addCalc(e.key);
+    else if(['+', '-', '*', '/'].includes(e.key)) addCalc(e.key);
+    else if(e.key === '.' || e.key === ',') addCalc('.');
+    else if(e.key === 'Enter') calculate();
+    else if(e.key === 'Escape') clearDisplay();
+    else if(e.key === 'Backspace') backspace();
+  }
+});
+</script>
+</body>
+</html>
